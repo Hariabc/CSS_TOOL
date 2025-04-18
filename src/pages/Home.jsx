@@ -21,7 +21,7 @@ const Home = () => {
             to="/gradient" 
             className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 p-8 text-white hover:shadow-xl transition-all duration-300 md:col-span-2 lg:col-span-1"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20 opacity-0 group-hover:transition-opacity duration-300"></div>
             <div className="relative z-10">
               <h2 className="text-2xl font-bold mb-2">Gradient Generator</h2>
               <p className="text-white/80 mb-4">Create beautiful linear and radial gradients</p>
