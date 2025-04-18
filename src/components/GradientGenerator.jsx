@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import GlassCard from './GlassCard';
 
 const GradientGenerator = () => {
   const [colors, setColors] = useState([
@@ -62,10 +63,7 @@ const GradientGenerator = () => {
 
   const saveGradient = () => {
     try {
-      // Get existing gradients or initialize empty array
       const savedGradients = JSON.parse(localStorage.getItem('savedGradients') || '[]');
-      
-      // Create new gradient object with unique ID
       const newGradient = {
         id: Date.now().toString(),
         type: gradientType,
@@ -74,11 +72,8 @@ const GradientGenerator = () => {
         cssCode,
         createdAt: new Date().toISOString()
       };
-      
-      // Add to array and save back to localStorage
       savedGradients.push(newGradient);
       localStorage.setItem('savedGradients', JSON.stringify(savedGradients));
-      
       alert('Gradient saved successfully!');
     } catch (error) {
       console.error('Error saving gradient:', error);
@@ -93,23 +88,36 @@ const GradientGenerator = () => {
   };
 
   return (
-    <div className="py-6 w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">Gradient Generator</h1>
+    <div className="py-8 w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+        Gradient Generator
+      </h1>
       
-      <div className="mb-8 h-48 sm:h-64 rounded-lg shadow-lg" style={gradientStyle}></div>
+      <div className="mb-8 h-64 sm:h-80 rounded-2xl shadow-2xl relative overflow-hidden transform transition-all duration-300 hover:scale-[1.02]">
+        <div className="absolute inset-0" style={gradientStyle}></div>
+        <GlassCard className="absolute inset-0" blurIntensity="sm" bgOpacity="5" borderOpacity="10" />
+      </div>
       
       <div className="flex flex-col sm:flex-row gap-6 mb-8">
         <div className="w-full sm:w-1/2">
-          <label className="block text-sm font-medium mb-2">Gradient Type</label>
+          <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">Gradient Type</label>
           <div className="flex gap-4">
             <button 
-              className={`flex-1 px-4 py-2 rounded-md text-sm ${gradientType === 'linear' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              className={`flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                gradientType === 'linear' 
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30' 
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
               onClick={() => setGradientType('linear')}
             >
               Linear
             </button>
             <button 
-              className={`flex-1 px-4 py-2 rounded-md text-sm ${gradientType === 'radial' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              className={`flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                gradientType === 'radial' 
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30' 
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
               onClick={() => setGradientType('radial')}
             >
               Radial
@@ -119,14 +127,14 @@ const GradientGenerator = () => {
         
         {gradientType === 'linear' && (
           <div className="w-full sm:w-1/2">
-            <label className="block text-sm font-medium mb-2">Angle: {angle}°</label>
+            <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">Angle: {angle}°</label>
             <input 
               type="range" 
               min="0" 
               max="360" 
               value={angle} 
               onChange={(e) => setAngle(parseInt(e.target.value))} 
-              className="w-full"
+              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
           </div>
         )}
@@ -134,77 +142,80 @@ const GradientGenerator = () => {
       
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold">Color Stops</h2>
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Color Stops</h2>
           <button 
             onClick={addColor}
-            className="bg-green-500 hover:bg-green-600 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md text-sm sm:text-base"
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40"
           >
             Add Color
           </button>
         </div>
         
         {colors.map((color, index) => (
-          <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 p-3 sm:p-4 bg-gray-100 dark:bg-gray-800 rounded-md">
-            <div className="w-full sm:w-auto flex items-center gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md" style={{ backgroundColor: color.color }}></div>
+          <GlassCard key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4 p-4">
+            <div className="w-full sm:w-auto flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-xl shadow-md transition-transform duration-300 hover:scale-110" 
+                style={{ backgroundColor: color.color }}
+              ></div>
               <div className="flex-1 sm:hidden">
-                <span className="block text-xs font-medium">{color.color}</span>
+                <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">{color.color}</span>
               </div>
             </div>
             <div className="w-full sm:w-1/3">
-              <label className="block text-xs sm:text-sm font-medium mb-1">Color</label>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Color</label>
               <input 
                 type="color" 
                 value={color.color} 
                 onChange={(e) => updateColor(index, e.target.value)} 
-                className="w-full h-8"
+                className="w-full h-10 rounded-xl cursor-pointer transition-transform duration-300 hover:scale-105"
               />
             </div>
             <div className="w-full sm:w-1/3">
-              <label className="block text-xs sm:text-sm font-medium mb-1">Position: {color.position}%</label>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Position: {color.position}%</label>
               <input 
                 type="range" 
                 min="0" 
                 max="100" 
                 value={color.position} 
                 onChange={(e) => updatePosition(index, parseInt(e.target.value))} 
-                className="w-full"
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
               />
             </div>
             {colors.length > 2 && (
               <button 
                 onClick={() => removeColor(index)}
-                className="mt-2 sm:mt-0 w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm"
+                className="mt-2 sm:mt-0 w-full sm:w-auto bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40"
               >
                 Remove
               </button>
             )}
-          </div>
+          </GlassCard>
         ))}
       </div>
       
-      <div className="mt-6 p-3 sm:p-4 bg-gray-100 dark:bg-gray-800 rounded-md">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
-          <h3 className="font-semibold">CSS Code</h3>
-          <div className="flex gap-2 w-full sm:w-auto">
+      <GlassCard className="mt-6 p-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">CSS Code</h3>
+          <div className="flex gap-3 w-full sm:w-auto">
             <button 
               onClick={saveGradient}
-              className="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm"
+              className="flex-1 sm:flex-none bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40"
             >
               Save
             </button>
             <button 
               onClick={copyToClipboard}
-              className="flex-1 sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-sm"
+              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40"
             >
               {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
         </div>
-        <pre className="bg-gray-200 dark:bg-gray-700 p-2 sm:p-3 rounded overflow-x-auto text-xs sm:text-sm">
+        <pre className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl overflow-x-auto text-sm font-mono border border-gray-200 dark:border-gray-700">
           {cssCode}
         </pre>
-      </div>
+      </GlassCard>
     </div>
   );
 };
