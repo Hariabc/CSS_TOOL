@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ColorPalette = () => {
   const [paletteType, setPaletteType] = useState('analogous');
-  const [baseColor, setBaseColor] = useState('#3498db');
+  const [baseColor, setBaseColor] = useState('#FF5F6D');
   const [colorCount, setColorCount] = useState(5);
   const [palette, setPalette] = useState([]);
-  const [copied, setCopied] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    generatePalette();
+  }, [baseColor, paletteType, colorCount]);
 
   const hexToHsl = (hex) => {
     // Convert hex to RGB
@@ -121,10 +125,10 @@ const ColorPalette = () => {
     setPalette(paletteColors);
   };
 
-  const copyToClipboard = (color, index) => {
+  const copyToClipboard = (color) => {
     navigator.clipboard.writeText(color);
-    setCopied(index);
-    setTimeout(() => setCopied(null), 1500);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const savePalette = () => {
@@ -154,103 +158,148 @@ const ColorPalette = () => {
   };
 
   return (
-    <div className="py-6 w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">Color Palette Generator</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-6 sm:p-10">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500 bg-clip-text text-transparent mb-4">
+            Color Palette Generator
+          </h1>
+          <p className="text-gray-400 text-lg">Generate harmonious color combinations for your projects</p>
+        </div>
 
-      <div className="grid grid-cols-1 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Base Color</label>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <input 
-                    type="color" 
-                    value={baseColor} 
-                    onChange={(e) => setBaseColor(e.target.value)}
-                    className="w-10 h-10 rounded cursor-pointer"
-                  />
-                  <span className="block text-xs sm:hidden">{baseColor}</span>
-                </div>
-                <input 
-                  type="text" 
-                  value={baseColor} 
-                  onChange={(e) => setBaseColor(e.target.value)} 
-                  className="px-3 py-2 border border-gray-300 rounded-md w-full sm:w-auto"
-                />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Preview Section */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-6 min-h-[400px]">
+              <div className="grid grid-cols-5 gap-4">
+                {palette.map((color, index) => (
+                  <div
+                    key={index}
+                    className="relative group cursor-pointer"
+                    onClick={() => copyToClipboard(color)}
+                  >
+                    <div
+                      className="aspect-square rounded-2xl transition-all duration-300 group-hover:scale-105 shadow-lg"
+                      style={{ backgroundColor: color }}
+                    />
+                    <div className="absolute inset-x-0 bottom-0 p-2 bg-black/50 backdrop-blur-sm rounded-b-2xl opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <p className="text-white text-sm font-medium text-center">
+                        {color.toUpperCase()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Palette Type</label>
-              <select 
-                value={paletteType} 
-                onChange={(e) => setPaletteType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
-                <option value="analogous">Analogous</option>
-                <option value="monochromatic">Monochromatic</option>
-                <option value="triadic">Triadic</option>
-                <option value="complementary">Complementary</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Number of Colors: {colorCount}</label>
-              <input 
-                type="range" 
-                min="2" 
-                max="10" 
-                value={colorCount} 
-                onChange={(e) => setColorCount(parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-
-            <div className="flex items-end">
-              <button 
-                onClick={generatePalette}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md text-sm sm:text-base"
-              >
-                Generate Palette
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {palette.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-              <h2 className="text-lg sm:text-xl font-semibold">Your Color Palette</h2>
-              <button 
+            {/* Quick Actions */}
+            <div className="flex gap-4">
+              <button
                 onClick={savePalette}
-                className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm sm:text-base"
+                className="flex-1 py-3 bg-green-500/90 hover:bg-green-500 text-white rounded-xl transition-all duration-300 backdrop-blur-sm"
               >
                 Save Palette
               </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-              {palette.map((color, index) => (
-                <div 
-                  key={index} 
-                  className="flex flex-col items-center"
-                  onClick={() => copyToClipboard(color, index)}
-                >
-                  <div 
-                    className="w-full aspect-square rounded-md shadow-md cursor-pointer transition-transform hover:scale-105" 
-                    style={{ backgroundColor: color }}
-                  ></div>
-                  <div className="mt-2 text-center">
-                    <p className="font-mono text-xs sm:text-sm">{color}</p>
-                    {copied === index && (
-                      <span className="text-xs text-green-500">Copied!</span>
-                    )}
-                  </div>
-                </div>
-              ))}
+              <button
+                onClick={() => copyToClipboard(palette.join(', '))}
+                className="flex-1 py-3 bg-blue-500/90 hover:bg-blue-500 text-white rounded-xl transition-all duration-300 backdrop-blur-sm"
+              >
+                {copied ? 'Copied!' : 'Copy All Colors'}
+              </button>
             </div>
           </div>
-        )}
+
+          {/* Controls Section */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Palette Settings */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-6">
+              <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                Palette Settings
+              </h2>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Base Color
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="color"
+                      value={baseColor}
+                      onChange={(e) => setBaseColor(e.target.value)}
+                      className="w-full h-16 rounded-xl cursor-pointer bg-gray-700 border-2 border-gray-600 focus:border-blue-500 transition-all duration-300"
+                    />
+                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-gray-900 px-2 py-1 rounded text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {baseColor.toUpperCase()}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Palette Type
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['analogous', 'monochromatic', 'triadic', 'complementary'].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setPaletteType(type)}
+                        className={`px-4 py-3 rounded-xl capitalize transition-all duration-300 ${
+                          paletteType === type
+                            ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                            : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Number of Colors: {colorCount}
+                  </label>
+                  <div className="space-y-2">
+                    <input
+                      type="range"
+                      min="2"
+                      max="8"
+                      value={colorCount}
+                      onChange={(e) => setColorCount(parseInt(e.target.value))}
+                      className="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                    />
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>2</span>
+                      <span>5</span>
+                      <span>8</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CSS Code */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-6">
+              <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                CSS Code
+              </h2>
+              <div className="bg-gray-900/80 rounded-xl p-4 font-mono">
+                {palette.map((color, index) => (
+                  <div key={index} className="text-gray-300 text-sm hover:text-blue-400 transition-colors duration-300 cursor-pointer" onClick={() => copyToClipboard(color)}>
+                    color: {color.toUpperCase()};
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

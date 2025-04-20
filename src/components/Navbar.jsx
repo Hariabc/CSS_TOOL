@@ -15,7 +15,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
               <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent transition-all duration-300 group-hover:from-purple-500 group-hover:to-blue-400">
-                Color Tools
+                CSS Tools
               </span>
             </Link>
           </div>

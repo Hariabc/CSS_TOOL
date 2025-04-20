@@ -1,165 +1,210 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import GlassCard from '../components/GlassCard';
 
 const SavedItems = () => {
+  const [savedItems, setSavedItems] = useState({
+    gradients: [],
+    palettes: [],
+    glassEffects: []
+  });
   const [activeTab, setActiveTab] = useState('gradients');
-  const [gradients, setGradients] = useState([]);
-  const [palettes, setPalettes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    // Load data from localStorage
-    try {
-      const savedGradients = JSON.parse(localStorage.getItem('savedGradients') || '[]');
-      const savedPalettes = JSON.parse(localStorage.getItem('savedPalettes') || '[]');
-      
-      setGradients(savedGradients);
-      setPalettes(savedPalettes);
-    } catch (error) {
-      console.error('Error loading saved items:', error);
-    } finally {
-      setLoading(false);
-    }
+    loadSavedItems();
   }, []);
 
-  const deleteGradient = (id) => {
+  const loadSavedItems = () => {
     try {
-      // Filter out the gradient with the given id
-      const updatedGradients = gradients.filter(gradient => gradient.id !== id);
+      const gradients = JSON.parse(localStorage.getItem('savedGradients') || '[]');
+      const palettes = JSON.parse(localStorage.getItem('savedPalettes') || '[]');
+      const glassEffects = JSON.parse(localStorage.getItem('savedGlassEffects') || '[]');
       
-      // Update state and localStorage
-      setGradients(updatedGradients);
-      localStorage.setItem('savedGradients', JSON.stringify(updatedGradients));
+      setSavedItems({
+        gradients,
+        palettes,
+        glassEffects
+      });
     } catch (error) {
-      console.error('Error deleting gradient:', error);
-      alert('Failed to delete gradient');
+      console.error('Error loading saved items:', error);
     }
   };
 
-  const deletePalette = (id) => {
+  const deleteItem = (type, id) => {
     try {
-      // Filter out the palette with the given id
-      const updatedPalettes = palettes.filter(palette => palette.id !== id);
-      
-      // Update state and localStorage
-      setPalettes(updatedPalettes);
-      localStorage.setItem('savedPalettes', JSON.stringify(updatedPalettes));
+      const items = JSON.parse(localStorage.getItem(`saved${type}`) || '[]');
+      const updatedItems = items.filter(item => item.id !== id);
+      localStorage.setItem(`saved${type}`, JSON.stringify(updatedItems));
+      loadSavedItems();
     } catch (error) {
-      console.error('Error deleting palette:', error);
-      alert('Failed to delete palette');
+      console.error('Error deleting item:', error);
     }
   };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const renderGradients = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {savedItems.gradients.map((gradient) => (
+        <GlassCard key={gradient.id} className="p-6">
+          <div className="h-32 rounded-lg mb-4" style={{ background: gradient.cssCode.replace('background: ', '') }}></div>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Type: {gradient.type}
+            </p>
+            {gradient.angle && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Angle: {gradient.angle}°
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => copyToClipboard(gradient.cssCode)}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+              <button
+                onClick={() => deleteItem('Gradients', gradient.id)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-300"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </GlassCard>
+      ))}
+    </div>
+  );
+
+  const renderPalettes = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {savedItems.palettes.map((palette) => (
+        <GlassCard key={palette.id} className="p-6">
+          <div className="grid grid-cols-5 gap-2 mb-4">
+            {palette.colors.map((color, index) => (
+              <div
+                key={index}
+                className="aspect-square rounded-lg"
+                style={{ backgroundColor: color }}
+              ></div>
+            ))}
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Type: {palette.type}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => copyToClipboard(palette.colors.join(', '))}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+              <button
+                onClick={() => deleteItem('Palettes', palette.id)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-300"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </GlassCard>
+      ))}
+    </div>
+  );
+
+  const renderGlassEffects = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {savedItems.glassEffects.map((effect) => (
+        <GlassCard key={effect.id} className="p-6">
+          <div className="h-32 rounded-lg mb-4" style={effect.style}></div>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Blur: {effect.blur}px
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Opacity: {Math.round(effect.opacity * 100)}%
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => copyToClipboard(effect.cssCode)}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+              <button
+                onClick={() => deleteItem('GlassEffects', effect.id)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-300"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </GlassCard>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="py-6 w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold">Your Saved Items</h1>
-        <Link to="/" className="text-blue-500 hover:text-blue-700 text-sm sm:text-base">
-          Back to Home
-        </Link>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Saved Items
+        </h1>
+
+        <GlassCard className="mb-8">
+          <div className="flex gap-4 p-6">
+            <button
+              onClick={() => setActiveTab('gradients')}
+              className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
+                activeTab === 'gradients'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              Gradients
+            </button>
+            <button
+              onClick={() => setActiveTab('palettes')}
+              className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
+                activeTab === 'palettes'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              Palettes
+            </button>
+            <button
+              onClick={() => setActiveTab('glassEffects')}
+              className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
+                activeTab === 'glassEffects'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              Glass Effects
+            </button>
+          </div>
+        </GlassCard>
+
+        {activeTab === 'gradients' && renderGradients()}
+        {activeTab === 'palettes' && renderPalettes()}
+        {activeTab === 'glassEffects' && renderGlassEffects()}
+
+        {savedItems[activeTab].length === 0 && (
+          <GlassCard className="p-8 text-center">
+            <p className="text-gray-600 dark:text-gray-400">
+              No saved {activeTab} found. Create some to see them here!
+            </p>
+          </GlassCard>
+        )}
       </div>
-
-      <div className="flex border-b mb-6 overflow-x-auto">
-        <button 
-          className={`py-2 px-4 font-medium text-sm sm:text-base whitespace-nowrap ${activeTab === 'gradients' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-          onClick={() => setActiveTab('gradients')}
-        >
-          Gradients
-        </button>
-        <button 
-          className={`py-2 px-4 font-medium text-sm sm:text-base whitespace-nowrap ${activeTab === 'palettes' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-          onClick={() => setActiveTab('palettes')}
-        >
-          Palettes
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      ) : (
-        <>
-          {activeTab === 'gradients' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {gradients.length === 0 ? (
-                <p className="text-gray-500 col-span-full text-center py-10 text-sm sm:text-base">No saved gradients found.</p>
-              ) : (
-                gradients.map((gradient) => (
-                  <div key={gradient.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                    <div 
-                      className="h-40" 
-                      style={{ 
-                        background: gradient.type === 'linear' 
-                          ? `linear-gradient(${gradient.angle}deg, ${gradient.colors.map(c => `${c.color} ${c.position}%`).join(', ')})` 
-                          : `radial-gradient(circle, ${gradient.colors.map(c => `${c.color} ${c.position}%`).join(', ')})`
-                      }}
-                    ></div>
-                    <div className="p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="font-medium text-sm sm:text-base">{gradient.type.charAt(0).toUpperCase() + gradient.type.slice(1)} Gradient</p>
-                        <button 
-                          onClick={() => deleteGradient(gradient.id)}
-                          className="text-red-500 hover:text-red-700 text-sm"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                      <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
-                        {gradient.cssCode}
-                      </pre>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {activeTab === 'palettes' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {palettes.length === 0 ? (
-                <p className="text-gray-500 col-span-full text-center py-10 text-sm sm:text-base">No saved palettes found.</p>
-              ) : (
-                palettes.map((palette) => (
-                  <div key={palette.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                    <div className="flex h-20">
-                      {palette.colors.map((color, index) => (
-                        <div 
-                          key={index} 
-                          className="flex-1" 
-                          style={{ backgroundColor: color }}
-                        ></div>
-                      ))}
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="font-medium text-sm sm:text-base">{palette.paletteType.charAt(0).toUpperCase() + palette.paletteType.slice(1)} Palette</p>
-                        <button 
-                          onClick={() => deletePalette(palette.id)}
-                          className="text-red-500 hover:text-red-700 text-sm"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-5 gap-2 mt-2">
-                        {palette.colors.map((color, index) => (
-                          <div key={index} className="text-center">
-                            <div 
-                              className="w-full aspect-square rounded-md mb-1" 
-                              style={{ backgroundColor: color }}
-                            ></div>
-                            <p className="text-xs font-mono truncate">{color}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 };

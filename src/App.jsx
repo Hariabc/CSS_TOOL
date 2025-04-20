@@ -4,7 +4,7 @@ import GradientGenerator from './components/GradientGenerator';
 import ColorPalette from './components/ColorPalette';
 import SavedItems from './pages/SavedItems';
 import Navbar from './components/Navbar';
-import GlassmorphismGenerator from './components/GlassmorphismGenerator';
+import Glassmorphism from './components/Glassmorphism';
 import './App.css';
 
 function App() {
@@ -18,7 +18,7 @@ function App() {
             <Route path="/gradient" element={<GradientGenerator />} />
             <Route path="/palette" element={<ColorPalette />} />
             <Route path="/saved" element={<SavedItems />} />
-            <Route path="/glassmorphism" element={<GlassmorphismGenerator />} />
+            <Route path="/glassmorphism" element={<Glassmorphism />} />
           </Routes>
         </div>
       </div>
