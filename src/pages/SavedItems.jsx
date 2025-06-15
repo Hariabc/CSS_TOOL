@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import GlassCard from '../components/GlassCard';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import GlassCard from "../components/GlassCard";
 
 const SavedItems = () => {
   const [savedItems, setSavedItems] = useState({
     gradients: [],
     palettes: [],
-    glassEffects: []
+    glassEffects: [],
   });
-  const [activeTab, setActiveTab] = useState('gradients');
+  const [activeTab, setActiveTab] = useState("gradients");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -17,28 +17,30 @@ const SavedItems = () => {
 
   const loadSavedItems = () => {
     try {
-      const gradients = JSON.parse(localStorage.getItem('savedGradients') || '[]');
-      const palettes = JSON.parse(localStorage.getItem('savedPalettes') || '[]');
-      const glassEffects = JSON.parse(localStorage.getItem('savedGlassEffects') || '[]');
-      
-      setSavedItems({
-        gradients,
-        palettes,
-        glassEffects
-      });
+      const gradients = JSON.parse(
+        localStorage.getItem("savedGradients") || "[]"
+      );
+      const palettes = JSON.parse(
+        localStorage.getItem("savedPalettes") || "[]"
+      );
+      const glassEffects = JSON.parse(
+        localStorage.getItem("savedGlassEffects") || "[]"
+      );
+
+      setSavedItems({ gradients, palettes, glassEffects });
     } catch (error) {
-      console.error('Error loading saved items:', error);
+      console.error("Error loading saved items:", error);
     }
   };
 
   const deleteItem = (type, id) => {
     try {
-      const items = JSON.parse(localStorage.getItem(`saved${type}`) || '[]');
-      const updatedItems = items.filter(item => item.id !== id);
+      const items = JSON.parse(localStorage.getItem(`saved${type}`) || "[]");
+      const updatedItems = items.filter((item) => item.id !== id);
       localStorage.setItem(`saved${type}`, JSON.stringify(updatedItems));
       loadSavedItems();
     } catch (error) {
-      console.error('Error deleting item:', error);
+      console.error("Error deleting item:", error);
     }
   };
 
@@ -48,11 +50,27 @@ const SavedItems = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const hexToRgba = (hex, opacity) => {
+    if (!hex || typeof opacity !== "number") return hex;
+    const bigint = parseInt(hex.replace("#", ""), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  };
+
   const renderGradients = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {savedItems.gradients.map((gradient) => (
         <GlassCard key={gradient.id} className="p-6">
-          <div className="h-32 rounded-lg mb-4" style={{ background: gradient.cssCode.replace('background: ', '') }}></div>
+          <div
+            className="h-32 rounded-lg mb-4"
+            style={{
+              background: gradient.cssCode
+                .replace(/^background:\s*/, "")
+                .replace(/;$/, ""),
+            }}
+          ></div>
           <div className="space-y-2">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Type: {gradient.type}
@@ -65,13 +83,13 @@ const SavedItems = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => copyToClipboard(gradient.cssCode)}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? "Copied!" : "Copy"}
               </button>
               <button
-                onClick={() => deleteItem('Gradients', gradient.id)}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-300"
+                onClick={() => deleteItem("Gradients", gradient.id)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
               >
                 Delete
               </button>
@@ -101,14 +119,14 @@ const SavedItems = () => {
             </p>
             <div className="flex gap-2">
               <button
-                onClick={() => copyToClipboard(palette.colors.join(', '))}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
+                onClick={() => copyToClipboard(palette.colors.join(", "))}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? "Copied!" : "Copy"}
               </button>
               <button
-                onClick={() => deleteItem('Palettes', palette.id)}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-300"
+                onClick={() => deleteItem("Palettes", palette.id)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
               >
                 Delete
               </button>
@@ -123,7 +141,17 @@ const SavedItems = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {savedItems.glassEffects.map((effect) => (
         <GlassCard key={effect.id} className="p-6">
-          <div className="h-32 rounded-lg mb-4" style={effect.style}></div>
+          <div
+            className="h-32 rounded-lg mb-4"
+            style={{
+              backdropFilter: `blur(${effect.blur}px)`,
+              WebkitBackdropFilter: `blur(${effect.blur}px)`,
+              backgroundColor: effect.backgroundColor,
+              opacity: effect.opacity,
+              border: `${effect.borderWidth}px solid ${effect.borderColor}`,
+              boxShadow: `0 0 ${effect.shadow || 20}px rgba(0, 0, 0, 0.1)`,
+            }}
+          ></div>
           <div className="space-y-2">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Blur: {effect.blur}px
@@ -136,10 +164,10 @@ const SavedItems = () => {
                 onClick={() => copyToClipboard(effect.cssCode)}
                 className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? "Copied!" : "Copy"}
               </button>
               <button
-                onClick={() => deleteItem('GlassEffects', effect.id)}
+                onClick={() => deleteItem("GlassEffects", effect.id)}
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-300"
               >
                 Delete
@@ -161,31 +189,31 @@ const SavedItems = () => {
         <GlassCard className="mb-8">
           <div className="flex gap-4 p-6">
             <button
-              onClick={() => setActiveTab('gradients')}
+              onClick={() => setActiveTab("gradients")}
               className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
-                activeTab === 'gradients'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                activeTab === "gradients"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
               }`}
             >
               Gradients
             </button>
             <button
-              onClick={() => setActiveTab('palettes')}
+              onClick={() => setActiveTab("palettes")}
               className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
-                activeTab === 'palettes'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                activeTab === "palettes"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
               }`}
             >
               Palettes
             </button>
             <button
-              onClick={() => setActiveTab('glassEffects')}
+              onClick={() => setActiveTab("glassEffects")}
               className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
-                activeTab === 'glassEffects'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                activeTab === "glassEffects"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
               }`}
             >
               Glass Effects
@@ -193,9 +221,9 @@ const SavedItems = () => {
           </div>
         </GlassCard>
 
-        {activeTab === 'gradients' && renderGradients()}
-        {activeTab === 'palettes' && renderPalettes()}
-        {activeTab === 'glassEffects' && renderGlassEffects()}
+        {activeTab === "gradients" && renderGradients()}
+        {activeTab === "palettes" && renderPalettes()}
+        {activeTab === "glassEffects" && renderGlassEffects()}
 
         {savedItems[activeTab].length === 0 && (
           <GlassCard className="p-8 text-center">
@@ -209,4 +237,4 @@ const SavedItems = () => {
   );
 };
 
-export default SavedItems; 
+export default SavedItems;

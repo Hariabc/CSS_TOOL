@@ -32,6 +32,24 @@ const Glassmorphism = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const saveToLocalStorage = () => {
+    const savedGlassEffects = JSON.parse(localStorage.getItem('glassEffects') || '[]');
+
+    const newEffect = {
+      blur,
+      opacity,
+      borderWidth,
+      borderColor,
+      backgroundColor,
+      borderRadius,
+      shadow,
+    };
+
+    savedGlassEffects.push(newEffect);
+    localStorage.setItem('glassEffects', JSON.stringify(savedGlassEffects));
+    alert('Glass Effect Saved!');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
@@ -44,7 +62,7 @@ const Glassmorphism = () => {
           <div className="relative h-[500px] rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-500 p-8">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20"></div>
             <div className="relative z-10 flex items-center justify-center h-full">
-              <div 
+              <div
                 className="w-64 h-64 flex items-center justify-center text-white text-lg font-medium transition-all duration-300"
                 style={glassStyle}
               >
@@ -57,9 +75,9 @@ const Glassmorphism = () => {
           <div className="space-y-6">
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Customize Glass Effect</h2>
-              
+
               <div className="space-y-4">
-                {/* Blur Control */}
+                {/* Blur */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Blur: {blur}px
@@ -74,7 +92,7 @@ const Glassmorphism = () => {
                   />
                 </div>
 
-                {/* Opacity Control */}
+                {/* Opacity */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Opacity: {Math.round(opacity * 100)}%
@@ -89,7 +107,7 @@ const Glassmorphism = () => {
                   />
                 </div>
 
-                {/* Border Width Control */}
+                {/* Border Width */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Border Width: {borderWidth}px
@@ -104,7 +122,7 @@ const Glassmorphism = () => {
                   />
                 </div>
 
-                {/* Border Color Control */}
+                {/* Border Color */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Border Color
@@ -117,7 +135,7 @@ const Glassmorphism = () => {
                   />
                 </div>
 
-                {/* Background Color Control */}
+                {/* Background Color */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Background Color
@@ -130,7 +148,7 @@ const Glassmorphism = () => {
                   />
                 </div>
 
-                {/* Border Radius Control */}
+                {/* Border Radius */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Border Radius: {borderRadius}px
@@ -145,7 +163,7 @@ const Glassmorphism = () => {
                   />
                 </div>
 
-                {/* Shadow Control */}
+                {/* Shadow Intensity */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Shadow Intensity: {shadow}%
@@ -162,16 +180,24 @@ const Glassmorphism = () => {
               </div>
             </div>
 
-            {/* CSS Code Section */}
+            {/* CSS Code & Save */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white">CSS Code</h2>
-                <button
-                  onClick={copyToClipboard}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
-                >
-                  {copied ? 'Copied!' : 'Copy'}
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={copyToClipboard}
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
+                  >
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                  <button
+                    onClick={saveToLocalStorage}
+                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-300"
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
               <pre className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm">
                 {cssCode}
@@ -184,4 +210,4 @@ const Glassmorphism = () => {
   );
 };
 
-export default Glassmorphism; 
+export default Glassmorphism;
