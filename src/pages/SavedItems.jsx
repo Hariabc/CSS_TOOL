@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import GlassCard from "../components/GlassCard";
 
 const SavedItems = () => {
@@ -17,15 +16,9 @@ const SavedItems = () => {
 
   const loadSavedItems = () => {
     try {
-      const gradients = JSON.parse(
-        localStorage.getItem("savedGradients") || "[]"
-      );
-      const palettes = JSON.parse(
-        localStorage.getItem("savedPalettes") || "[]"
-      );
-      const glassEffects = JSON.parse(
-        localStorage.getItem("savedGlassEffects") || "[]"
-      );
+      const gradients = JSON.parse(localStorage.getItem("savedGradients") || "[]");
+      const palettes = JSON.parse(localStorage.getItem("savedPalettes") || "[]");
+      const glassEffects = JSON.parse(localStorage.getItem("savedGlassEffects") || "[]");
 
       setSavedItems({ gradients, palettes, glassEffects });
     } catch (error) {
@@ -50,17 +43,8 @@ const SavedItems = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const hexToRgba = (hex, opacity) => {
-    if (!hex || typeof opacity !== "number") return hex;
-    const bigint = parseInt(hex.replace("#", ""), 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  };
-
   const renderGradients = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {savedItems.gradients.map((gradient) => (
         <GlassCard key={gradient.id} className="p-6">
           <div
@@ -80,7 +64,7 @@ const SavedItems = () => {
                 Angle: {gradient.angle}°
               </p>
             )}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => copyToClipboard(gradient.cssCode)}
                 className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
@@ -101,7 +85,7 @@ const SavedItems = () => {
   );
 
   const renderPalettes = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {savedItems.palettes.map((palette) => (
         <GlassCard key={palette.id} className="p-6">
           <div className="grid grid-cols-5 gap-2 mb-4">
@@ -117,7 +101,7 @@ const SavedItems = () => {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Type: {palette.type}
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => copyToClipboard(palette.colors.join(", "))}
                 className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
@@ -138,7 +122,7 @@ const SavedItems = () => {
   );
 
   const renderGlassEffects = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {savedItems.glassEffects.map((effect) => (
         <GlassCard key={effect.id} className="p-6">
           <div
@@ -146,10 +130,9 @@ const SavedItems = () => {
             style={{
               backdropFilter: `blur(${effect.blur}px)`,
               WebkitBackdropFilter: `blur(${effect.blur}px)`,
-              backgroundColor: effect.backgroundColor,
-              opacity: effect.opacity,
+              backgroundColor: `rgba(255,255,255,${effect.opacity})`,
               border: `${effect.borderWidth}px solid ${effect.borderColor}`,
-              boxShadow: `0 0 ${effect.shadow || 20}px rgba(0, 0, 0, 0.1)`,
+              boxShadow: `0 0 ${effect.shadow || 30}px rgba(0, 0, 0, 0.15)`,
             }}
           ></div>
           <div className="space-y-2">
@@ -159,16 +142,16 @@ const SavedItems = () => {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Opacity: {Math.round(effect.opacity * 100)}%
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => copyToClipboard(effect.cssCode)}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300"
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
               >
                 {copied ? "Copied!" : "Copy"}
               </button>
               <button
                 onClick={() => deleteItem("GlassEffects", effect.id)}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-300"
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
               >
                 Delete
               </button>
@@ -187,37 +170,20 @@ const SavedItems = () => {
         </h1>
 
         <GlassCard className="mb-8">
-          <div className="flex gap-4 p-6">
-            <button
-              onClick={() => setActiveTab("gradients")}
-              className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
-                activeTab === "gradients"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-              }`}
-            >
-              Gradients
-            </button>
-            <button
-              onClick={() => setActiveTab("palettes")}
-              className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
-                activeTab === "palettes"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-              }`}
-            >
-              Palettes
-            </button>
-            <button
-              onClick={() => setActiveTab("glassEffects")}
-              className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
-                activeTab === "glassEffects"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-              }`}
-            >
-              Glass Effects
-            </button>
+          <div className="flex flex-wrap gap-4 p-4 sm:p-6 justify-center">
+            {["gradients", "palettes", "glassEffects"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
+                  activeTab === tab
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
           </div>
         </GlassCard>
 
@@ -226,7 +192,7 @@ const SavedItems = () => {
         {activeTab === "glassEffects" && renderGlassEffects()}
 
         {savedItems[activeTab].length === 0 && (
-          <GlassCard className="p-8 text-center">
+          <GlassCard className="p-8 text-center mt-6">
             <p className="text-gray-600 dark:text-gray-400">
               No saved {activeTab} found. Create some to see them here!
             </p>
